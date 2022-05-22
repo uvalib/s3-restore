@@ -151,7 +151,7 @@ func getObject(svc *s3.S3, object S3Object) error {
 }
 
 func restoreObject(cfg *ServiceConfig, svc *s3.S3, object S3Object) error {
-	log.Printf("IsRestoring: s3://%s/%s", object.BucketName, object.KeyName)
+	log.Printf("Restoring: s3://%s/%s", object.BucketName, object.KeyName)
 
 	input := &s3.RestoreObjectInput{
 		Bucket: aws.String(object.BucketName),
@@ -164,7 +164,7 @@ func restoreObject(cfg *ServiceConfig, svc *s3.S3, object S3Object) error {
 		},
 	}
 
-	result, err := svc.RestoreObject(input)
+	_, err := svc.RestoreObject(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -187,7 +187,7 @@ func restoreObject(cfg *ServiceConfig, svc *s3.S3, object S3Object) error {
 			return err
 		}
 	} else {
-		log.Printf("INFO: %s", result)
+		//log.Printf("INFO: %s", result)
 	}
 	return nil
 }
