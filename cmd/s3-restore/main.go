@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 
 	"github.com/uvalib/uva-aws-s3-sdk/uva-s3"
 )
 
-var filename = "output.file"
 
 //
 // main entry point
@@ -28,8 +28,11 @@ func main() {
 		log.Fatalf("ERROR: %s", err.Error())
 	}
 
+        filename := path.Base( cfg.KeyName )
+
 	if o.IsGlacier() == false {
 		log.Printf("INFO: object NOT in glacier, getting it in the normal way")
+
 		err = s3Svc.GetToFile(o, filename)
 		if err != nil {
 			log.Fatalf("ERROR: %s", err.Error())
@@ -48,7 +51,8 @@ func main() {
 				log.Printf("INFO: available as %s", filename)
 			} else {
 				log.Printf("INFO: object in glacier, beginning a restore...")
-				err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
+				//err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
+				err = s3Svc.RestoreObject(o, uva_s3.RESTORE_STANDARD, int64(cfg.RestoreDays))
 				if err != nil {
 					log.Fatalf("ERROR: %s", err.Error())
 				}
