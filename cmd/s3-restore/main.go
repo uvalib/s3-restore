@@ -31,7 +31,7 @@ func main() {
         filename := path.Base( cfg.KeyName )
 
 	if o.IsGlacier() == false {
-		log.Printf("INFO: object NOT in glacier, getting it in the normal way")
+		log.Printf("INFO: object NOT in glacier (or is glacier IR), getting it in the normal way")
 
 		err = s3Svc.GetToFile(o, filename)
 		if err != nil {
