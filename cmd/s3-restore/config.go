@@ -10,6 +10,7 @@ type ServiceConfig struct {
 	BucketName  string
 	KeyName     string
 	RestoreDays int
+	Restore     bool
 }
 
 // LoadConfiguration will load the service configuration from env/cmdline
@@ -20,7 +21,8 @@ func LoadConfiguration() *ServiceConfig {
 
 	flag.StringVar(&cfg.BucketName, "bucket", "", "The bucket name")
 	flag.StringVar(&cfg.KeyName, "key", "", "The key name")
-	flag.IntVar(&cfg.RestoreDays, "days", 1, "Number of days to restore (default 1)")
+	flag.IntVar(&cfg.RestoreDays, "days", 1, "Number of days to restore")
+	flag.BoolVar(&cfg.Restore, "restore", false, "Actually restore (default false)")
 
 	flag.Parse()
 

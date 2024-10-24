@@ -8,10 +8,7 @@ import (
 	"github.com/uvalib/uva-aws-s3-sdk/uva-s3"
 )
 
-
-//
 // main entry point
-//
 func main() {
 
 	cfg := LoadConfiguration()
@@ -28,7 +25,7 @@ func main() {
 		log.Fatalf("ERROR: %s", err.Error())
 	}
 
-        filename := path.Base( cfg.KeyName )
+	filename := path.Base(cfg.KeyName)
 
 	if o.IsGlacier() == false {
 		log.Printf("INFO: object NOT in glacier (or is glacier IR), getting it in the normal way")
@@ -50,11 +47,15 @@ func main() {
 				}
 				log.Printf("INFO: available as %s", filename)
 			} else {
-				log.Printf("INFO: object in glacier, beginning a restore...")
-				//err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
-				err = s3Svc.RestoreObject(o, uva_s3.RESTORE_STANDARD, int64(cfg.RestoreDays))
-				if err != nil {
-					log.Fatalf("ERROR: %s", err.Error())
+				if cfg.Restore == true {
+					log.Printf("INFO: object in glacier, beginning a restore...")
+					//err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
+					err = s3Svc.RestoreObject(o, uva_s3.RESTORE_STANDARD, int64(cfg.RestoreDays))
+					if err != nil {
+						log.Fatalf("ERROR: %s", err.Error())
+					}
+				} else {
+					log.Printf("INFO: object in glacier, can be restored")
 				}
 			}
 		}
