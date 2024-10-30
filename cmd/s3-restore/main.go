@@ -27,39 +27,76 @@ func main() {
 
 	filename := path.Base(cfg.KeyName)
 
-	if o.IsGlacier() == false {
-		log.Printf("INFO: object NOT in glacier (or is glacier IR), getting it in the normal way")
+	// see if the file already exists locally
+	exists := false
+	if _, err := os.Stat(filename); err == nil {
+		exists = true
+	}
+
+	// see if a glacier restore is in progress
+	if o.IsGlacier() == true && o.IsRestoring() == true {
+		log.Printf("INFO: object in glacier, restore is IN PROGRESS; terminating normally")
+
+		// and done
+		os.Exit(0)
+	}
+
+	// see if a glacier restore is done
+	if o.IsGlacier() == true && o.IsRestored() == true {
+		log.Printf("INFO: object in glacier and has been restored")
+
+		if exists == true && cfg.Overwrite == false {
+			log.Printf("INFO: exists locally without overwrite option; terminating normally")
+			// and done
+			os.Exit(0)
+		}
 
 		err = s3Svc.GetToFile(o, filename)
 		if err != nil {
 			log.Fatalf("ERROR: %s", err.Error())
 		}
-		log.Printf("INFO: available as %s", filename)
-	} else {
-		if o.IsRestoring() == true {
-			log.Printf("INFO: object in glacier, restore is IN PROGRESS...")
-		} else {
-			if o.IsRestored() == true {
-				log.Printf("INFO: object in glacier and has been restored")
-				err = s3Svc.GetToFile(o, filename)
-				if err != nil {
-					log.Fatalf("ERROR: %s", err.Error())
-				}
-				log.Printf("INFO: available as %s", filename)
-			} else {
-				if cfg.Restore == true {
-					log.Printf("INFO: object in glacier, beginning a restore...")
-					//err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
-					err = s3Svc.RestoreObject(o, uva_s3.RESTORE_STANDARD, int64(cfg.RestoreDays))
-					if err != nil {
-						log.Fatalf("ERROR: %s", err.Error())
-					}
-				} else {
-					log.Printf("INFO: object in glacier, can be restored")
-				}
-			}
-		}
+		log.Printf("INFO: available as %s; terminating normally", filename)
+
+		// and done
+		os.Exit(0)
 	}
+
+	// item is not in glacier
+	if o.IsGlacier() == false {
+		log.Printf("INFO: object NOT in glacier (or is glacier IR)")
+
+		if exists == true && cfg.Overwrite == false {
+			log.Printf("INFO: exists locally without overwrite option; terminating normally")
+			// and done
+			os.Exit(0)
+		}
+
+		err = s3Svc.GetToFile(o, filename)
+		if err != nil {
+			log.Fatalf("ERROR: %s", err.Error())
+		}
+		log.Printf("INFO: available as %s; terminating normally", filename)
+
+		// and done
+		os.Exit(0)
+	}
+
+	// object is in glacier and can be restored
+	if cfg.Restore == true {
+		log.Printf("INFO: object in glacier")
+
+		//err = s3Svc.RestoreObject(o, uva_s3.RESTORE_EXPEDITED, int64(cfg.RestoreDays))
+		err = s3Svc.RestoreObject(o, uva_s3.RESTORE_STANDARD, int64(cfg.RestoreDays))
+		if err != nil {
+			log.Fatalf("ERROR: %s", err.Error())
+		}
+		log.Printf("INFO: initiated restore; terminating normally")
+
+	} else {
+		log.Printf("INFO: object in glacier, can be restored; terminating normally")
+	}
+
+	// and done
 	os.Exit(0)
 }
 

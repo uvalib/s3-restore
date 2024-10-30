@@ -11,6 +11,7 @@ type ServiceConfig struct {
 	KeyName     string
 	RestoreDays int
 	Restore     bool
+	Overwrite   bool
 }
 
 // LoadConfiguration will load the service configuration from env/cmdline
@@ -23,6 +24,7 @@ func LoadConfiguration() *ServiceConfig {
 	flag.StringVar(&cfg.KeyName, "key", "", "The key name")
 	flag.IntVar(&cfg.RestoreDays, "days", 1, "Number of days to restore")
 	flag.BoolVar(&cfg.Restore, "restore", false, "Actually restore (default false)")
+	flag.BoolVar(&cfg.Overwrite, "overwrite", false, "Overwrite local file if it exists (default false)")
 
 	flag.Parse()
 
